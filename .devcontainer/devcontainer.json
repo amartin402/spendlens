@@ -1,0 +1,37 @@
+{
+  "name": "spendlens",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": false
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "forwardPorts": [
+    5173,
+    8000
+  ],
+  "portsAttributes": {
+    "5173": {
+      "label": "frontend (dev)"
+    },
+    "8000": {
+      "label": "backend / app"
+    }
+  },
+  "postCreateCommand": "npm install --global opencode-ai && make setup",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-playwright.playwright"
+      ]
+    }
+  },
+  "hostRequirements": {
+    "cpus": 2
+  }
+}

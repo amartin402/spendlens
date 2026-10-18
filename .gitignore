@@ -1,0 +1,48 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.local
+*.secret
+*.secrets
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+credentials.*.json
+secrets.json
+
+# Dependencies and package-manager state
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build and coverage output
+dist/
+build/
+coverage/
+.next/
+.vite/
+
+# Runtime data, logs, and local databases
+*.log
+*.sqlite
+*.sqlite3
+*.db
+tmp/
+temp/
+data/
+test-data/
+
+# Local tooling and operating-system files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
