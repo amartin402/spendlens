@@ -1,7 +1,10 @@
-.PHONY: setup test
+.PHONY: setup test build
 
 setup:
 	@printf '%s\n' 'SpendLens development environment ready.'
 
 test:
-	@printf '%s\n' 'No tests configured yet.'
+	cd frontend && npm install --silent && npm test
+
+build:
+	cd frontend && npm install --silent && npm run build
