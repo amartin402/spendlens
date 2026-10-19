@@ -1,7 +1,7 @@
 import type { Category, SpendLensService, Subscription, Transaction } from './types'
 import { monthOf, monthlyEquivalent, parseCsv } from './logic'
 
-const key = 'spendlens-mock-v1'; const colors = ['#d97757', '#6f8f72', '#d5a648', '#7489a6', '#9b7bb5', '#c27b5d']
+const key = 'spendlens-mock-v1'; const colors = ['#e86f51', '#1f9d8b', '#e3a72f', '#5577b8', '#8b6fc4', '#d05b72']
 const seed = () => { const categories: Category[] = [{ id: 'food', name: 'Food' }, { id: 'rent', name: 'Rent' }, { id: 'transport', name: 'Transport' }, { id: 'fun', name: 'Entertainment' }, { id: 'software', name: 'Software' }, { id: 'other', name: 'Other' }]; const transactions: Transaction[] = [
   ['2026-08-02','Market Hall',6840,'food'],['2026-08-04','Metro pass',7200,'transport'],['2026-08-07','Harbor rent',185000,'rent'],['2026-08-11','Figma',1500,'software'],['2026-08-14','Luna Cinema',2800,'fun'],['2026-08-22','Corner bakery',1240,'food'],
   ['2026-09-01','Market Hall',7230,'food'],['2026-09-03','Harbor rent',185000,'rent'],['2026-09-06','Cloudflare',2500,'software'],['2026-09-12','Trainline',3620,'transport'],['2026-09-18','The Lantern',4600,'fun'],['2026-09-27','Fresh basket',5380,'food'],

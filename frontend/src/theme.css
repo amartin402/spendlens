@@ -1,0 +1,155 @@
+:root {
+  color: #172a3a;
+  background: #fbfaf7;
+}
+
+.sidebar {
+  background: #172c3a;
+  color: #f7fbfc;
+}
+
+.brand-mark,
+.brand span span {
+  color: #f07859;
+}
+
+.workspace {
+  border-color: #315064;
+}
+
+.workspace small,
+.metric small,
+.sub-summary small {
+  color: #7d929c;
+}
+
+.avatar {
+  background: #f29a78;
+  color: #3d2630;
+}
+
+.chevron {
+  color: #a6bac2;
+}
+
+nav button {
+  color: #a6bbc4;
+}
+
+nav button.active,
+nav button:hover,
+.settings:hover {
+  background: #25495a;
+  color: #fff;
+}
+
+.tip {
+  border-color: #315064;
+  color: #c4d4d9;
+}
+
+.tip span {
+  color: #f5b84b;
+}
+
+.tip small {
+  color: #91a9b2;
+}
+
+.settings {
+  color: #abc0c8;
+}
+
+main {
+  background: #fbfaf7;
+}
+
+.eyebrow,
+.toolbar p {
+  color: #718792;
+}
+
+.card,
+.table-card,
+.metric,
+.category-card {
+  background: #fff;
+  border-color: #e3ebe9;
+  box-shadow: 0 8px 24px rgba(23, 44, 58, .06);
+}
+
+.metric.highlight {
+  background: linear-gradient(135deg, #fff3e9, #e8f7f4);
+  border-color: #f5c5a7;
+}
+
+.metric.highlight strong {
+  color: #207e76;
+}
+
+.primary {
+  background: #e86f51;
+  color: #fff;
+}
+
+.primary:hover {
+  background: #d75c40;
+}
+
+.pill {
+  background: #e8f7f4;
+  color: #197c70;
+}
+
+.notice {
+  background: #fff0df;
+  border-color: #f3bf8f;
+  color: #7b4526;
+}
+
+.category-card > span {
+  background: #ffe2d7 !important;
+  color: #b94f36;
+}
+
+.category-card:nth-child(2) > span {
+  background: #d9f1ec !important;
+  color: #197c70;
+}
+
+.category-card:nth-child(3) > span {
+  background: #fff0c9 !important;
+  color: #936a0d;
+}
+
+.category-card:nth-child(4) > span {
+  background: #dce7fa !important;
+  color: #48669d;
+}
+
+.category-card:nth-child(5) > span {
+  background: #e9e0fa !important;
+  color: #7253a8;
+}
+
+.category-card:nth-child(6) > span {
+  background: #f8dce4 !important;
+  color: #a74963;
+}
+
+.bar i {
+  background: #e86f51;
+}
+
+.service-icon {
+  background: #d9f1ec;
+  color: #197c70;
+}
+
+.amount {
+  color: #d75c40;
+}
+
+.up {
+  color: #1f9d8b;
+}
