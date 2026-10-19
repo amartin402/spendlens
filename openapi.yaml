@@ -2,5 +2,894 @@ openapi: 3.0.3
 info:
   title: SpendLens API
   version: 0.1.0
-  description: API contract for SpendLens.
-paths: {}
+  description: Expense and subscription tracking API.
+servers:
+  - url: /
+tags:
+  - name: Auth
+  - name: Categories
+  - name: Transactions
+  - name: Subscriptions
+  - name: Reports
+  - name: Operations
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '201':
+          description: User registered and authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email is already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in a user
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: User authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /me:
+    get:
+      tags: [Auth]
+      summary: Get the current user
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List the current user's categories
+      operationId: listCategories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Categories]
+      summary: Create a category
+      operationId: createCategory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /categories/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    patch:
+      tags: [Categories]
+      summary: Rename a category
+      operationId: updateCategory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+      responses:
+        '200':
+          description: Category renamed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags: [Categories]
+      summary: Delete a category
+      operationId: deleteCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reassign_to
+          in: query
+          description: Reassign existing transactions to this category before deletion.
+          required: false
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Category deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Category has transactions and no valid reassignment was supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /transactions:
+    get:
+      tags: [Transactions]
+      summary: List transactions
+      operationId: listTransactions
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - name: category_id
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          description: Case-insensitive text search of the description.
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: A paginated transaction list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Transactions]
+      summary: Create a transaction
+      operationId: createTransaction
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCreate'
+      responses:
+        '201':
+          description: Transaction created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /transactions/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Transactions]
+      summary: Get a transaction
+      operationId: getTransaction
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Transactions]
+      summary: Update a transaction
+      operationId: updateTransaction
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionUpdate'
+      responses:
+        '200':
+          description: Transaction updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Transactions]
+      summary: Delete a transaction
+      operationId: deleteTransaction
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Transaction deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /transactions/import:
+    post:
+      tags: [Transactions]
+      summary: Import transactions from CSV
+      operationId: importTransactions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          text/csv:
+            schema:
+              type: string
+              description: CSV with header date,description,amount,category.
+      responses:
+        '200':
+          description: Import summary; invalid rows do not fail valid rows.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsvImportResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /subscriptions:
+    get:
+      tags: [Subscriptions]
+      summary: List subscriptions
+      operationId: listSubscriptions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/SubscriptionStatus'
+      responses:
+        '200':
+          description: Subscriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Subscriptions]
+      summary: Create a subscription
+      operationId: createSubscription
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionCreate'
+      responses:
+        '201':
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /subscriptions/upcoming:
+    get:
+      tags: [Subscriptions]
+      summary: List upcoming renewals
+      operationId: listUpcomingSubscriptions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: days
+          in: query
+          description: Number of days from today to include.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 14
+      responses:
+        '200':
+          description: Active subscriptions renewing within the requested window
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /subscriptions/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Subscriptions]
+      summary: Get a subscription
+      operationId: getSubscription
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Subscriptions]
+      summary: Update a subscription
+      operationId: updateSubscription
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionUpdate'
+      responses:
+        '200':
+          description: Subscription updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Subscriptions]
+      summary: Delete a subscription
+      operationId: deleteSubscription
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Subscription deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /reports/monthly:
+    get:
+      tags: [Reports]
+      summary: Get a monthly spending report
+      operationId: getMonthlyReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Month'
+      responses:
+        '200':
+          description: Monthly spending report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyReport'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /reports/trend:
+    get:
+      tags: [Reports]
+      summary: Get monthly spending trends
+      operationId: getTrendReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: months
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 60
+            default: 6
+      responses:
+        '200':
+          description: Spending trend points, oldest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrendPoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /health:
+    get:
+      tags: [Operations]
+      summary: Check service health
+      operationId: health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    From:
+      name: from
+      in: query
+      schema:
+        type: string
+        format: date
+    To:
+      name: to
+      in: query
+      schema:
+        type: string
+        format: date
+    Month:
+      name: month
+      in: query
+      required: true
+      schema:
+        type: string
+        pattern: '^\d{4}-\d{2}$'
+        example: 2026-10
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: page_size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+  responses:
+    BadRequest:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Missing or invalid bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource does not exist for the authenticated user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Request conflicts with existing data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    AuthRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+    AuthResponse:
+      type: object
+      required: [access_token, token_type, user]
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          enum: [bearer]
+        user:
+          $ref: '#/components/schemas/User'
+    User:
+      type: object
+      required: [id, email]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+    Category:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          minLength: 1
+    CategoryCreate:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+    CategoryUpdate:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+    Date:
+      type: string
+      format: date
+    Transaction:
+      type: object
+      required: [id, date, description, amountCents, categoryId, source]
+      properties:
+        id:
+          type: string
+        date:
+          $ref: '#/components/schemas/Date'
+        description:
+          type: string
+        amountCents:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Positive amount in integer cents.
+        categoryId:
+          type: string
+        source:
+          type: string
+          enum: [manual, csv]
+    TransactionCreate:
+      type: object
+      required: [date, description, amountCents, categoryId]
+      properties:
+        date:
+          $ref: '#/components/schemas/Date'
+        description:
+          type: string
+          minLength: 1
+        amountCents:
+          type: integer
+          format: int64
+          minimum: 1
+        categoryId:
+          type: string
+        source:
+          type: string
+          enum: [manual, csv]
+          default: manual
+    TransactionUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        date:
+          $ref: '#/components/schemas/Date'
+        description:
+          type: string
+          minLength: 1
+        amountCents:
+          type: integer
+          format: int64
+          minimum: 1
+        categoryId:
+          type: string
+    TransactionList:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    CsvImportResult:
+      type: object
+      required: [imported, rejected]
+      properties:
+        imported:
+          type: integer
+          minimum: 0
+        rejected:
+          type: array
+          items:
+            $ref: '#/components/schemas/CsvRejectedRow'
+    CsvRejectedRow:
+      type: object
+      required: [row, reason]
+      properties:
+        row:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+    BillingPeriod:
+      type: string
+      enum: [weekly, monthly, yearly]
+    SubscriptionStatus:
+      type: string
+      enum: [active, cancelled]
+    Subscription:
+      type: object
+      required: [id, name, amountCents, billingPeriod, nextRenewalDate, categoryId, status]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        amountCents:
+          type: integer
+          format: int64
+          minimum: 1
+        billingPeriod:
+          $ref: '#/components/schemas/BillingPeriod'
+        nextRenewalDate:
+          $ref: '#/components/schemas/Date'
+        categoryId:
+          type: string
+        status:
+          $ref: '#/components/schemas/SubscriptionStatus'
+        monthlyEquivalentCents:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Rounded monthly equivalent calculated from amountCents and billingPeriod.
+    SubscriptionCreate:
+      type: object
+      required: [name, amountCents, billingPeriod, nextRenewalDate, categoryId]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        amountCents:
+          type: integer
+          format: int64
+          minimum: 1
+        billingPeriod:
+          $ref: '#/components/schemas/BillingPeriod'
+        nextRenewalDate:
+          $ref: '#/components/schemas/Date'
+        categoryId:
+          type: string
+    SubscriptionUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+        amountCents:
+          type: integer
+          format: int64
+          minimum: 1
+        billingPeriod:
+          $ref: '#/components/schemas/BillingPeriod'
+        nextRenewalDate:
+          $ref: '#/components/schemas/Date'
+        categoryId:
+          type: string
+        status:
+          $ref: '#/components/schemas/SubscriptionStatus'
+    MonthlyReport:
+      type: object
+      required: [totalCents, subscriptionCents, categories, topMerchants]
+      properties:
+        totalCents:
+          type: integer
+          format: int64
+        subscriptionCents:
+          type: integer
+          format: int64
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategorySpend'
+        topMerchants:
+          type: array
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/MerchantSpend'
+    CategorySpend:
+      type: object
+      required: [name, totalCents]
+      properties:
+        name:
+          type: string
+        totalCents:
+          type: integer
+          format: int64
+        color:
+          type: string
+    MerchantSpend:
+      type: object
+      required: [name, totalCents]
+      properties:
+        name:
+          type: string
+        totalCents:
+          type: integer
+          format: int64
+    TrendPoint:
+      type: object
+      required: [month, label, totalCents, subscriptionCents]
+      properties:
+        month:
+          type: string
+          pattern: '^\d{4}-\d{2}$'
+        label:
+          type: string
+        totalCents:
+          type: integer
+          format: int64
+        subscriptionCents:
+          type: integer
+          format: int64
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: string
