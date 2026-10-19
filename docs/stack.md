@@ -13,9 +13,9 @@ This stack best matches the existing OpenAPI contract and the developer's Python
 | API | FastAPI | HTTP routing, bearer authentication integration, request validation, and OpenAPI generation |
 | Schemas | Pydantic v2 | Validate request payloads and shape responses to the OpenAPI schemas |
 | Persistence | SQLAlchemy 2.x | Relational models, transactions, and database access |
-| Migrations | Alembic | Versioned database schema changes |
-| Database | PostgreSQL | Production persistence, constraints, indexes, and report queries |
-| Local database | SQLite | Optional lightweight local development database |
+| Schema initialization | SQLAlchemy `create_all` | Documented MVP schema initialization; can be replaced by Alembic later |
+| Database | SQLite via `DATABASE_URL` | Local persistence and the default runtime database |
+| Future database | PostgreSQL via `DATABASE_URL` | Production persistence without changing route-level queries |
 | Password hashing | Argon2 or bcrypt | Secure password storage |
 | Authentication | JWT bearer tokens | Implements the `bearerAuth` OpenAPI security scheme |
 | Testing | Pytest | Unit, API, and database integration tests |
@@ -65,7 +65,7 @@ The report queries should be verified against the requirement of responding in u
 
 ## Initial Implementation Guidance
 
-1. Define SQLAlchemy models and Alembic migrations for users, categories, transactions, and subscriptions.
+1. Define SQLAlchemy models and initialize the MVP schema with `Base.metadata.create_all`; introduce Alembic when schema versioning is needed.
 2. Implement authentication and a dependency that resolves the current user from the JWT.
 3. Implement CRUD endpoints with Pydantic schemas matching `openapi.yaml`.
 4. Add CSV parsing with per-row validation and a result containing imported and rejected rows.
