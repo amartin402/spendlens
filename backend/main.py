@@ -12,11 +12,13 @@ import uuid
 from collections import Counter
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from pathlib import Path
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, Header, Query, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -518,3 +520,7 @@ def trend_report(months: int = Query(6, ge=1, le=60), user: User = Depends(curre
         report = report_data(user.id, key, db)
         points.append({"month": key, "label": date(year, month, 1).strftime("%b %Y"), "totalCents": report["totalCents"], "subscriptionCents": report["subscriptionCents"]})
     return points
+
+
+FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True, check_dir=False), name="frontend")

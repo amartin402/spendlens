@@ -1,1 +1,31 @@
-services: {}
+services:
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-spendlens}
+      POSTGRES_USER: ${POSTGRES_USER:-spendlens}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - spendlens-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-spendlens}:${POSTGRES_PASSWORD:-change-me}@database:5432/${POSTGRES_DB:-spendlens}
+      SPENDLENS_SECRET: ${SPENDLENS_SECRET:-change-this-development-secret}
+    ports:
+      - "${APP_PORT:-8000}:8000"
+
+volumes:
+  spendlens-postgres-data:

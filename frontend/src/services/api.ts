@@ -60,6 +60,20 @@ const json = (body: unknown): RequestInit => ({
 })
 
 export const apiService: SpendLensService = {
+  isAuthenticated: () => Boolean(storedToken()),
+  register: async (email, password) => {
+    const response = await fetch(`${apiUrl}/auth/register`, json({ email, password }))
+    if (!response.ok) throw new Error(await errorMessage(response))
+    const data = await response.json() as AuthResponse
+    localStorage.setItem(tokenKey, data.access_token)
+  },
+  login: async (email, password) => {
+    const response = await fetch(`${apiUrl}/auth/login`, json({ email, password }))
+    if (!response.ok) throw new Error(await errorMessage(response))
+    const data = await response.json() as AuthResponse
+    localStorage.setItem(tokenKey, data.access_token)
+  },
+  logout: () => localStorage.removeItem(tokenKey),
   getCategories: () => request<Category[]>('/categories'),
   getTransactions: async () => (await request<{ items: Transaction[] }>('/transactions?page_size=100')).items,
   addTransaction: (input) => request<Transaction>('/transactions', json(input)),
